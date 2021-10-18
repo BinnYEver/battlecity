@@ -3,10 +3,37 @@ package battlecity;
 public class Tank {
     private int x;
     private int y;
+    private int direction;
+    private int speed = 5;
+
+    public int getDirection() {
+        return direction;
+    }
+
+    public void MoveUp() {
+        y -= speed;
+    }
+
+    public void MoveRight() {
+        x += speed;
+    }
+
+    public void MoveDown() {
+        y += speed;
+    }
+
+    public void MoveLeft() {
+        x -= speed;
+    }
+
+    public void setDirection(int direction) {
+        this.direction = direction;
+    }
 
     public Tank(int x, int y) {
         this.x = x;
         this.y = y;
+
     }
 
     public int getX() {
