@@ -10,6 +10,8 @@ public class BattleCity extends JFrame {
     public  BattleCity() {
         mp = new MyPanel();
         this.add(mp);
+        Thread thread = new Thread(mp);
+        thread.start();
         this.setSize(1000,750);
         this.addKeyListener(mp);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

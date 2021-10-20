@@ -4,12 +4,24 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.Vector;
 
-public class MyPanel extends JPanel implements KeyListener {
+public class MyPanel extends JPanel implements KeyListener, Runnable {
     MyTank myTank = null;
+    Vector<EnemyTank> enemyTanks = new Vector<>();
+    int enemyTankSize = 3;
 
     public MyPanel() {
-        myTank = new MyTank(100, 100);// the inital position of my tank
+        myTank = new MyTank(100, 100);// the initial position of my tank
+        for (int i = 0; i < enemyTankSize; i++) {
+            EnemyTank enemyTank = new EnemyTank(100 * (i + 1), 0);
+            enemyTank.setDirection(2);
+            Bullet enemyBullet = new Bullet(enemyTank.getX() + 20, enemyTank.getY() + 60, enemyTank.getDirection());
+            enemyTank.enemyTankBullet.add(enemyBullet);
+            new Thread(enemyBullet).start();
+
+            enemyTanks.add(enemyTank);
+        }
     }
 
     @Override
@@ -18,8 +30,47 @@ public class MyPanel extends JPanel implements KeyListener {
 
         g.fillRect(0, 0, 1000, 750);
         drawTank(myTank.getX(), myTank.getY(), g, myTank.getDirection(), 0);
+        if (myTank.bullet != null && myTank.bullet.isLive) {
+            System.out.println("bullet has been paint");
+            g.fill3DRect(myTank.bullet.getX(), myTank.bullet.getY(), 1, 1, false);
 
-//        g.fillOval(10, 10, 20, 20);
+        }
+        for (EnemyTank one : enemyTanks) {
+            if (one.isLive) {
+                drawTank(one.getX(), one.getY(), g, one.getDirection(), 1);
+                for (int i = 0; i < one.enemyTankBullet.size(); i++) {
+                    Bullet bullet = one.enemyTankBullet.get(i);
+                    if (bullet.isLive) {
+                        g.fill3DRect(bullet.getX(), bullet.getY(), 1, 1, false);
+                    } else {
+                        one.enemyTankBullet.remove(bullet);
+                    }
+                }
+            }
+
+
+        }
+
+    }
+
+    public static void hitTank(Bullet bullet, EnemyTank enemyTank) {
+        switch (enemyTank.getDirection()) {
+            case 0:
+            case 2:
+                if (bullet.getX() > enemyTank.getX() && bullet.getX() < enemyTank.getX() + 40
+                        && bullet.getY() > enemyTank.getY() && bullet.getY() < enemyTank.getY() + 60) {
+                    bullet.isLive = false;
+                    enemyTank.isLive = false;
+                }
+                break;
+            case 1:
+            case 3:
+                if (bullet.getX() > enemyTank.getX() && bullet.getX() < enemyTank.getX() + 60
+                        && bullet.getY() > enemyTank.getY() && bullet.getY() < enemyTank.getY() + 40) {
+                    bullet.isLive = false;
+                    enemyTank.isLive = false;
+                }
+        }
     }
 
     public void drawTank(int x, int y, Graphics g, int direction, int type) {
@@ -96,11 +147,36 @@ public class MyPanel extends JPanel implements KeyListener {
                 myTank.MoveLeft();
             }
         }
+        if (e.getKeyCode() == KeyEvent.VK_J) {
+            System.out.println("J has been pressed");
+            myTank.ShotBullet();
+        }
+
         this.repaint();
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
+
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            if (myTank.bullet.isLive) {
+                for (EnemyTank one : enemyTanks) {
+                    hitTank(myTank.bullet, one);
+                }
+            }
+
+            this.repaint();
+        }
 
     }
 }

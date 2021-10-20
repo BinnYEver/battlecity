@@ -4,7 +4,7 @@ public class Tank {
     private int x;
     private int y;
     private int direction;
-    private int speed = 5;
+    private int speed = 1;
 
     public int getDirection() {
         return direction;
